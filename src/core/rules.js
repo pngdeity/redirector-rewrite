@@ -42,7 +42,6 @@ export class Rule {
     if (!rule.includePattern || rule.includePattern.trim() === '') {
       errors.push('Include pattern is required.');
     } else {
-      // Validate pattern syntax
       try {
         if (rule.patternType === PatternType.REGEX) {
           new RegExp(rule.includePattern);

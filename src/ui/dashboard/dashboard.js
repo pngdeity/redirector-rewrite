@@ -3,19 +3,16 @@ import { Engine } from '../../core/engine.js';
 import { Rule, PatternType, MatchProcessing } from '../../core/rules.js';
 import { Dom } from '../../utils/dom.js';
 
-// DOM Elements
 const rulesList = document.getElementById('rules-list');
 const rulesCount = document.getElementById('rules-count');
 const emptyState = document.getElementById('empty-state');
 
-// Dialog Elements
 const ruleDialog = document.getElementById('rule-dialog');
 const deleteDialog = document.getElementById('delete-dialog');
 const modalBackdrop = document.getElementById('modal-backdrop');
 const ruleForm = document.getElementById('rule-form');
 const dialogTitle = document.getElementById('dialog-title');
 
-// Form Inputs
 const ruleIdInput = document.getElementById('rule-id');
 const descriptionInput = document.getElementById('rule-description');
 const exampleUrlInput = document.getElementById('rule-example-url');
@@ -27,12 +24,10 @@ const processingSelect = document.getElementById('rule-processing');
 const applyToCheckboxes = document.getElementById('apply-to-checkboxes');
 const groupedInput = document.getElementById('rule-grouped');
 
-// Testing inputs & outputs
 const testUrlInput = document.getElementById('test-url');
 const testStatusBadge = document.getElementById('test-status');
 const testResultSpan = document.getElementById('test-result');
 
-// Trigger Buttons
 const btnCreateRule = document.getElementById('btn-create-rule');
 const btnEmptyCreate = document.getElementById('btn-empty-create');
 const btnCloseDialog = document.getElementById('btn-close-dialog');
@@ -46,7 +41,6 @@ const enableSyncCheckbox = document.getElementById('enable-sync');
 const btnOrganize = document.getElementById('btn-organize');
 const processingHint = document.getElementById('processing-hint');
 
-// Global State
 let allRules = [];
 let deleteTargetId = null;
 let organizeModeActive = false;
@@ -468,11 +462,9 @@ function openEditDialog(rule = null) {
       patternDescInput.value = rule.patternDesc || '';
       processingSelect.value = rule.matchProcessing || MatchProcessing.NONE;
     updateProcessingHint();
-    // Pattern type radio select
     const patternTypeRadio = ruleForm.querySelector(`input[name="pattern-type"][value="${rule.patternType}"]`);
     if (patternTypeRadio) patternTypeRadio.checked = true;
 
-    // Checkboxes appliesTo
     const checkboxes = applyToCheckboxes.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(box => {
       box.checked = rule.appliesTo ? rule.appliesTo.includes(box.value) : false;
@@ -485,7 +477,6 @@ function openEditDialog(rule = null) {
     ruleIdInput.value = '';
     testUrlInput.value = '';
     groupedInput.checked = false;
-    // select first radio button
     ruleForm.querySelector('input[name="pattern-type"][value="WILDCARD"]').checked = true;
   }
   
@@ -606,12 +597,9 @@ async function handleFormSubmit(e) {
 
   const existingIdx = allRules.findIndex(r => r.id === savedState.id);
   if (existingIdx !== -1) {
-    // Edit existing rule
-    // Preserve active toggle state
     savedState.enabled = allRules[existingIdx].enabled;
     allRules[existingIdx] = savedState;
   } else {
-    // Add new rule
     allRules.push(savedState);
   }
 
@@ -659,7 +647,6 @@ function importRules(e) {
       let importedCount = 0;
       let existingCount = 0;
       importedArray.forEach(rawRule => {
-        // Construct basic rule schema defaults if missing fields
         const compiledRule = {
           id: rawRule.id || Rule.generateId(),
           description: rawRule.description || 'Imported rule',
@@ -676,7 +663,6 @@ function importRules(e) {
         const errors = Rule.validate(compiledRule);
         if (errors.length !== 0) return;
 
-        // Avoid duplicate IDs
         if (allRules.some(r => r.id === compiledRule.id)) {
           compiledRule.id = Rule.generateId();
         }
@@ -725,7 +711,6 @@ async function handleSyncToggle() {
   await loadRules();
 }
 
-// Attach listeners
 btnCreateRule.addEventListener('click', () => openEditDialog());
 btnEmptyCreate.addEventListener('click', () => openEditDialog());
 btnCloseDialog.addEventListener('click', closeDialog);
@@ -734,11 +719,9 @@ btnConfirmDelete.addEventListener('click', confirmDelete);
 btnCancelDelete.addEventListener('click', closeDeleteDialog);
 ruleForm.addEventListener('submit', handleFormSubmit);
 
-// Import/Export Attachments
 btnExport.addEventListener('click', exportRules);
 importFileInput.addEventListener('change', importRules);
 
-// Live testing listeners
 ruleForm.addEventListener('input', runLiveTest);
 testUrlInput.addEventListener('input', runLiveTest);
 

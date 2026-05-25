@@ -2,7 +2,6 @@ import { Engine } from '../core/engine.js';
 import { Storage } from '../adapters/storage.js';
 import { Interceptor } from '../adapters/interceptor.js';
 
-// Service Worker Orchestrator
 console.log('Redirector MV3 Service Worker initialized.');
 
 function isDarkMode() {
@@ -52,7 +51,6 @@ chrome.storage.onChanged.addListener((changes) => {
   }
 });
 
-// Listen for installation/update events
 chrome.runtime.onInstalled.addListener(async () => {
   try {
     console.log('Redirector extension installed/updated.');
@@ -82,14 +80,13 @@ chrome.runtime.onInstalled.addListener(async () => {
   }
 });
 
-// Listen for messages from popup or options page
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message || typeof message.type !== 'string') return;
   if (message.type === 'SYNC_RULES') {
     Interceptor.syncRulesWithBrowser()
       .then(() => sendResponse({ success: true }))
       .catch(err => sendResponse({ success: false, error: err?.message || String(err) }));
-    return true; // Keep message channel open for async response
+    return true;
   }
 });
 
@@ -135,7 +132,6 @@ async function triggerRedirectNotification(sourceUrl, targetUrl) {
  */
 chrome.webNavigation.onHistoryStateUpdated.addListener(async (details) => {
   try {
-    // Only check if it's the main frame (frameId === 0)
     if (details.frameId !== 0) return;
 
     const isDisabled = await Storage.isDisabled();
@@ -146,15 +142,12 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(async (details) => {
     const historyRules = rules.filter(r => r.enabled && r.appliesTo && r.appliesTo.includes('history'));
     if (historyRules.length === 0) return;
 
-    // Evaluate rules using the matching engine
     const result = Engine.evaluateRules(historyRules, details.url);
     if (result && result.matched && result.resultUrl && result.resultUrl !== details.url) {
       console.log(`[HistoryState SPA] Intercepted navigation: ${details.url} -> ${result.resultUrl}`);
-      
-      // Update the tab URL programmatically
+
       chrome.tabs.update(details.tabId, { url: result.resultUrl });
-      
-      // Display native desktop toast alert
+
       await triggerRedirectNotification(details.url, result.resultUrl);
     }
   } catch (err) {

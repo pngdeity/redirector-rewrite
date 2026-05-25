@@ -41,14 +41,12 @@ export class Engine {
    */
   static evaluateRule(rule, url) {
     try {
-      // 1. Check Include Pattern
       const includeRegex = this.patternToRegex(rule.includePattern, rule.patternType);
       const match = url.match(includeRegex);
       if (!match) {
         return { matched: false };
       }
 
-      // 2. Check Exclude Pattern (if present)
       if (rule.excludePattern) {
         const excludeRegex = this.patternToRegex(rule.excludePattern, rule.patternType);
         if (url.match(excludeRegex)) {
@@ -56,7 +54,6 @@ export class Engine {
         }
       }
 
-      // 3. Process matches and substitute variables
       const substitutedUrl = this.substitute(rule.targetUrl, match, rule.matchProcessing);
 
       return {
@@ -123,7 +120,7 @@ export class Engine {
         try {
           return atob(val);
         } catch {
-          return val; // Fallback on decode failure
+          return val;
         }
       case 'NONE':
       default:
@@ -145,14 +142,12 @@ export class Engine {
     let steps = 0;
     let matched = false;
 
-    // Compile rules list to include the override if provided (e.g. testing unsaved edits)
     let activeRules = [...rules];
     if (currentRuleOverride) {
       const idx = activeRules.findIndex(r => r.id === currentRuleOverride.id);
       if (idx !== -1) {
         activeRules[idx] = currentRuleOverride;
       } else {
-        // Unsaved new rule: insert at the beginning for testing purposes
         activeRules.unshift(currentRuleOverride);
       }
     }
@@ -167,7 +162,6 @@ export class Engine {
       const nextUrl = matchResult.resultUrl;
       steps++;
 
-      // If next URL matches its own output or takes us back to a visited URL: LOOP!
       if (visited.has(nextUrl)) {
         return {
           matched: true,

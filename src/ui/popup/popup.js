@@ -1,6 +1,5 @@
 import { Storage } from '../../adapters/storage.js';
 
-// Elements
 const toggleDisabledBtn = document.getElementById('toggle-disabled');
 const openDashboardBtn = document.getElementById('open-dashboard');
 const enableLoggingCheckbox = document.getElementById('enable-logging');
@@ -17,7 +16,6 @@ async function syncUI() {
   const options = await Storage.getOptions();
   optionsState = { ...options };
 
-  // Update Global Toggle
   if (disabled) {
     toggleDisabledBtn.className = 'btn btn-toggle disabled';
     toggleDisabledBtn.textContent = 'Disabled';
@@ -26,7 +24,6 @@ async function syncUI() {
     toggleDisabledBtn.textContent = 'Enabled';
   }
 
-  // Update options check states
   enableLoggingCheckbox.checked = options.logging;
   enableNotificationsCheckbox.checked = options.enableNotifications;
 }
@@ -40,7 +37,6 @@ async function handleToggle() {
   
   await Storage.setDisabled(newDisabled);
   
-  // Inform background worker to update browser rules
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
     chrome.runtime.sendMessage({ type: 'SYNC_RULES' });
   }
@@ -68,7 +64,7 @@ function openDashboard() {
       const existingTab = tabs.find(tab => tab.url === url);
       if (existingTab) {
         chrome.tabs.update(existingTab.id, { active: true });
-        window.close(); // Close popup
+        window.close();
       } else {
         chrome.tabs.create({ url, active: true });
       }
@@ -78,7 +74,6 @@ function openDashboard() {
   }
 }
 
-// Initialize Page
 async function init() {
   await syncUI();
 
@@ -86,7 +81,6 @@ async function init() {
     versionFooter.textContent = `Redirector Rewrite v${chrome.runtime.getManifest().version}`;
   }
 
-  // Attach event handlers
   toggleDisabledBtn.addEventListener('click', handleToggle);
   openDashboardBtn.addEventListener('click', openDashboard);
   
