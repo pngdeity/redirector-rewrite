@@ -57,10 +57,11 @@ Descriptions for both stores are in `store-listing.md`.
 
 ### Privacy Policy
 
-Host `privacy.md` at an accessible URL. GitHub Pages is recommended:
-- Enable Pages on the repo: Settings → Pages → Source: main branch
-- URL will be `https://pngdeity.github.io/redirector-rewrite/privacy`
-- Paste this URL into both store listing forms
+The privacy policy is served via GitHub Pages at:
+
+`https://pngdeity.ru/redirector-rewrite/privacy`
+
+Pages is already configured at the account level with the `pngdeity.ru` custom domain.
 
 ### Firefox AMO Specific
 
