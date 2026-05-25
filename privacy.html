@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — Redirector Rewrite</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #1a1a1a; }
+    h1 { font-size: 1.5em; }
+    h2 { font-size: 1.1em; margin-top: 1.5em; }
+    a { color: #2563eb; }
+  </style>
+</head>
+<body>
+  <h1>Privacy Policy</h1>
+  <p>Redirector Rewrite does not collect, transmit, or share any personal information.</p>
+
+  <h2>Data Storage</h2>
+  <p>All redirect rules and extension preferences are stored locally in your browser using the <code>chrome.storage</code> API. If you enable Storage Sync, rules are synced across your devices via your browser&#39;s sync service (Chrome Sync or Firefox Sync). The extension developer has no access to this data.</p>
+
+  <h2>Network Requests</h2>
+  <p>The extension intercepts outbound network requests to apply user-defined URL redirects. It does not send any data to external servers. The <code>declarativeNetRequest</code> API processes all redirects natively within the browser.</p>
+
+  <h2>Permissions</h2>
+  <ul>
+    <li><strong>storage</strong> — Stores your redirect rules and preferences locally</li>
+    <li><strong>declarativeNetRequest</strong> — Intercepts and redirects network requests based on your rules</li>
+    <li><strong>webNavigation</strong> — Detects single-page application navigation for redirects</li>
+    <li><strong>tabs</strong> — Opens and updates tabs for redirects</li>
+    <li><strong>notifications</strong> — Shows a notification when a redirect occurs (if enabled)</li>
+  </ul>
+
+  <h2>Contact</h2>
+  <p>For questions or concerns about this extension, open an issue at <a href="https://github.com/pngdeity/redirector-rewrite">github.com/pngdeity/redirector-rewrite</a></p>
+</body>
+</html>

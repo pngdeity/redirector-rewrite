@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirector Options</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <!-- Overlay Backdrop for Modal Forms -->
+  <div id="modal-backdrop" class="modal-backdrop hidden"></div>
+
+  <!-- Modal Dialog: Create / Edit Redirect -->
+  <dialog id="rule-dialog" class="rule-dialog">
+    <header class="dialog-header">
+      <h3 id="dialog-title">Create Redirect</h3>
+      <button id="btn-close-dialog" class="btn-close" aria-label="Close dialog">&times;</button>
+    </header>
+    
+    <form id="rule-form" class="rule-form">
+      <input type="hidden" id="rule-id">
+      
+      <div class="form-group">
+        <label for="rule-description">Description</label>
+        <input type="text" id="rule-description" placeholder="e.g., Redirect Wikipedia to Wikipedia mobile" required>
+      </div>
+
+      <div class="form-group">
+        <label for="rule-example-url">Example URL</label>
+        <input type="text" id="rule-example-url" placeholder="e.g., https://en.wikipedia.org/wiki/Main_Page">
+      </div>
+
+      <div class="form-group">
+        <label for="rule-include-pattern">Include Pattern</label>
+        <input type="text" id="rule-include-pattern" placeholder="e.g., *://en.wikipedia.org/wiki/*" required>
+      </div>
+
+      <div class="form-group">
+        <label for="rule-target-url">Redirect To</label>
+        <input type="text" id="rule-target-url" placeholder="e.g., https://en.m.wikipedia.org/wiki/$2" required>
+      </div>
+
+      <div class="form-group-row">
+        <div class="form-group inline">
+          <label>Pattern Type</label>
+          <div class="radio-group">
+            <label><input type="radio" name="pattern-type" value="WILDCARD" checked> Wildcard</label>
+            <label><input type="radio" name="pattern-type" value="REGEX"> Regular Expression</label>
+          </div>
+        </div>
+
+        <div class="form-group inline">
+          <label for="rule-processing">Match Processing</label>
+          <select id="rule-processing">
+            <option value="NONE">No Processing</option>
+            <option value="URL_DECODE">URL Decode</option>
+            <option value="URL_ENCODE">URL Encode</option>
+            <option value="DOUBLE_URL_DECODE">Double URL Decode</option>
+            <option value="BASE64_DECODE">Base64 Decode</option>
+          </select>
+          <span id="processing-hint" class="processing-hint"></span>
+        </div>
+      </div>
+
+      <!-- Advanced Section -->
+      <details class="advanced-details">
+        <summary>Show advanced options</summary>
+        <div class="advanced-content">
+          <div class="form-group">
+            <label class="checkbox-label-control" style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; cursor: pointer; user-select: none;">
+              <input type="checkbox" id="rule-grouped" style="width: 16px; height: 16px; accent-color: var(--color-blue);">
+              <span>Visual Grouping (Link rule to neighbor)</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="rule-exclude-pattern">Exclude Pattern</label>
+            <input type="text" id="rule-exclude-pattern" placeholder="Pattern to exclude from redirection">
+          </div>
+          
+          <div class="form-group">
+            <label for="rule-pattern-desc">Pattern Description (Hint)</label>
+            <input type="text" id="rule-pattern-desc" placeholder="Describe your pattern or note its purpose">
+          </div>
+
+          <div class="form-group">
+            <label>Apply To</label>
+            <div id="apply-to-checkboxes" class="checkbox-grid">
+              <label><input type="checkbox" value="main_frame" checked> Main Window (URL bar)</label>
+              <label><input type="checkbox" value="sub_frame"> IFrames</label>
+              <label><input type="checkbox" value="script"> Scripts</label>
+              <label><input type="checkbox" value="stylesheet"> Stylesheets</label>
+              <label><input type="checkbox" value="image"> Images</label>
+              <label><input type="checkbox" value="font"> Fonts</label>
+              <label><input type="checkbox" value="xmlhttprequest"> Ajax (Fetch/XHR)</label>
+              <label><input type="checkbox" value="history"> HistoryState (SPAs)</label>
+              <label><input type="checkbox" value="other"> Other</label>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Live Testing Integration -->
+      <section class="testing-section">
+        <h4>Live Rule Test</h4>
+        <div class="test-grid">
+          <div class="form-group">
+            <label for="test-url">Test Outbound URL</label>
+            <input type="text" id="test-url" placeholder="Type a URL to test against your rule pattern">
+          </div>
+          <div class="test-result-card">
+            <span class="test-badge badge-neutral" id="test-status">Idle</span>
+            <div class="test-result-wrapper">
+              <span class="result-label">Resulting URL:</span>
+              <span id="test-result" class="result-value">None</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="dialog-actions">
+        <button type="submit" id="btn-save-rule" class="btn btn-success">Save</button>
+        <button type="button" id="btn-cancel-rule" class="btn btn-grey">Cancel</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Delete Rule Dialog -->
+  <dialog id="delete-dialog" class="confirm-dialog">
+    <h3>Delete Redirect Rule?</h3>
+    <p>Are you sure you want to delete <strong id="delete-rule-desc"></strong>?</p>
+    <div class="dialog-actions">
+      <button id="btn-confirm-delete" class="btn btn-danger">Yes, Delete</button>
+      <button id="btn-cancel-delete" class="btn btn-grey">Cancel</button>
+    </div>
+  </dialog>
+
+  <!-- Main Options Workspace -->
+  <div class="container">
+    <header class="app-header">
+      <div class="brand">
+        <h1 class="logo">REDIRECTOR</h1>
+        <p class="tagline">Go where <em>YOU</em> want!</p>
+      </div>
+      
+      <!-- Top Action Controls -->
+      <div class="menu-bar">
+        <button id="btn-create-rule" class="btn btn-primary">Create new redirect</button>
+        
+        <div class="file-actions">
+          <input type="file" id="import-file" accept=".json,.rjson,.txt" class="hidden-file-input">
+          <label for="import-file" class="btn btn-outline">Import</label>
+          <button id="btn-export" class="btn btn-outline">Export</button>
+        </div>
+        
+        <button id="btn-organize" class="btn btn-outline">Organize</button>
+
+        <a href="../help/help.html" class="btn btn-outline btn-help" target="_blank">Help</a>
+      </div>
+    </header>
+
+    <main class="app-content">
+      <!-- Alerts & Notifications -->
+      <div id="alert-box" class="alert-box hidden"></div>
+
+      <!-- Rules Table/Cards List -->
+      <section class="rules-section">
+        <div class="section-header">
+          <h2>Redirect Rules</h2>
+          <span class="rules-count" id="rules-count">0 rules</span>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon">&garr;</div>
+          <h3>No Redirect Rules Yet</h3>
+          <p>Create your first redirect rule to start intercepting and reshaping web requests!</p>
+          <button id="btn-empty-create" class="btn btn-primary">Create New Redirect</button>
+        </div>
+
+        <div id="rules-list" class="rules-list"></div>
+
+        <label id="storage-sync-option" class="toggle-control" style="margin-top: 16px;">
+          <input type="checkbox" id="enable-sync">
+          <span class="control-label">Enable Storage Sync (cross-device rule sharing)</span>
+        </label>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>Redirector Rewrite &bull; Secure &amp; Lightweight browser request router</p>
+    </footer>
+  </div>
+
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>

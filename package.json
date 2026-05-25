@@ -1,0 +1,25 @@
+{
+  "name": "redirector-rewrite",
+  "version": "0.0.0",
+  "description": "Clean and lightweight rewrite of the Redirector browser extension in Manifest V3.",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/core/engine.test.js && node tests/core/rules.test.js",
+    "lint": "npx addons-linter src",
+    "lint:js": "eslint src/ scripts/ tests/",
+    "package": "rm -f dist/redirector-rewrite.zip && mkdir -p dist && cd src && zip -r ../dist/redirector-rewrite.zip . -x '*.DS_Store'",
+    "clean": "rm -rf dist/ test-results/ playwright-report/",
+    "publish:chrome": "npx chrome-webstore-upload-cli upload --source dist/redirector-rewrite.zip --auto-publish",
+    "publish:firefox": "npx web-ext sign --source-dir src --artifacts-dir dist --channel listed --api-key $AMO_JWT_ISSUER --api-secret $AMO_JWT_SECRET",
+    "screenshots": "node scripts/capture-screenshots.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.60.0",
+    "addons-linter": "10.5.0",
+    "chrome-webstore-upload-cli": "4.0.0",
+    "eslint": "^10.4.0",
+    "web-ext": "10.2.0"
+  },
+  "author": "pngdeity",
+  "license": "ISC"
+}

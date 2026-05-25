@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirector Help &amp; Guide</title>
+  <link rel="stylesheet" href="help.css">
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <h1 class="logo">REDIRECTOR HELP</h1>
+      <p class="subtitle">Understanding Wildcards, Regular Expressions, and Capture Groups</p>
+    </header>
+
+    <main class="help-content">
+
+      <section class="card" id="toc">
+        <h2>Table of Contents</h2>
+        <ul>
+          <li><a href="#quick-start">Quick Start</a></li>
+          <li><a href="#pattern-types">Pattern Types</a></li>
+          <li><a href="#processing">Match Processing Options</a></li>
+          <li><a href="#apply-to">Apply To (Request Types)</a></li>
+          <li><a href="#storage-sync">Storage Sync</a></li>
+          <li><a href="#organize-mode">Organize Mode &amp; Grouping</a></li>
+          <li><a href="#examples">Detailed Examples</a></li>
+        </ul>
+      </section>
+
+      <section class="card" id="quick-start">
+        <h2>Quick Start</h2>
+        <p>Redirector intercepts outbound web requests matching your custom <strong>Include Pattern</strong>, excludes those matching your <strong>Exclude Pattern</strong>, and routes them to your <strong>Redirect Target URL</strong>.</p>
+        <p>To create your first redirect:</p>
+        <ol>
+          <li>Click the Redirector icon in your browser toolbar and select <strong>Edit Redirects</strong>.</li>
+          <li>Click <strong>Create new redirect</strong>.</li>
+          <li>Fill in the fields as described below. Use the <strong>Live Test</strong> section to preview matches in real-time.</li>
+          <li>Click <strong>Save</strong>. Your redirect is now active.</li>
+        </ol>
+        <p>Redirects are evaluated in order from top to bottom. Use the ▲/▼ arrows to reorder them by priority.</p>
+      </section>
+
+      <section class="card" id="pattern-types">
+        <h2>Pattern Types</h2>
+
+        <div class="pattern-type-block">
+          <h3>1. Wildcards</h3>
+          <p>Wildcards are the easiest way to match URLs. The asterisk character (<code>*</code>) matches any sequence of characters (non-greedy, meaning it matches the <em>shortest</em> possible string). You can use multiple stars in one pattern.</p>
+
+          <h4>Wildcard Examples</h4>
+          <table>
+            <tr><th>Pattern</th><th>Matches</th></tr>
+            <tr><td><code>http://example.com/*</code></td><td><code>http://example.com/</code>, <code>http://example.com/foo</code>, <code>http://example.com/bar</code></td></tr>
+            <tr><td><code>http://*.example.com</code></td><td><code>http://www.example.com</code>, <code>http://mail.example.com</code></td></tr>
+            <tr><td><code>*://example.com</code></td><td><code>http://example.com</code>, <code>https://example.com</code></td></tr>
+          </table>
+
+          <h4>Capture Groups with Wildcards</h4>
+          <p>Each <code>*</code> in your pattern becomes a capture group. Use <code>$1</code>, <code>$2</code>, etc. in your redirect target to refer to them:</p>
+          <div class="example-box">
+            <strong>Include Pattern:</strong> <code>*://*.wikipedia.org/wiki/*</code><br>
+            <strong>Redirect Target:</strong> <code>https://wikipedia.org/wiki/$3</code><br>
+            <p class="description"><code>$1</code> = protocol, <code>$2</code> = subdomain, <code>$3</code> = article title.</p>
+          </div>
+        </div>
+
+        <div class="pattern-type-block">
+          <h3>2. Regular Expressions</h3>
+          <p>Regular expressions (regex) provide complete power over URL matching. Use parentheses <code>(...)</code> to create capture groups and refer to them as <code>$1</code>, <code>$2</code>, etc. in the redirect target.</p>
+
+          <h4>Regex Examples</h4>
+          <div class="example-box">
+            <strong>Include Pattern:</strong> <code>^https?:\/\/([^\.]+)\.slack\.com\/(.*)</code><br>
+            <strong>Redirect Target:</strong> <code>https://slack.com/workspace/$1/path/$2</code><br>
+            <p class="description">Captures the Slack workspace name as <code>$1</code> and the path suffix as <code>$2</code>.</p>
+          </div>
+
+          <div class="example-box">
+            <strong>Include Pattern:</strong> <code>^(https?://)(www.)?youtube.com/shorts/(.*)</code><br>
+            <strong>Redirect Target:</strong> <code>$1www.youtube.com/watch?v=$3</code><br>
+            <p class="description">Redirects YouTube Shorts to regular YouTube. Check "HistoryState" in <em>Apply To</em> for SPA navigation.</p>
+          </div>
+
+          <p><strong>Tip:</strong> Use a site like <a href="https://regexr.com" target="_blank">RegExr</a> to test your regular expressions. Remember to escape special characters: <code>?</code> → <code>\?</code>, <code>.</code> → <code>\.</code>, <code>/</code> → <code>\/</code>.</p>
+        </div>
+      </section>
+
+      <section class="card" id="processing">
+        <h2>Match Processing Options</h2>
+        <p>When substituting captured groups into your target URL, you can transform them:</p>
+        <ul>
+          <li><strong>No Processing:</strong> Injects the raw captured string.</li>
+          <li><strong>URL Decode:</strong> Decodes URI sequences (e.g. converting <code>%20</code> back to spaces or <code>%2F</code> to <code>/</code>). Useful for redirecting tracking or routing parameters.</li>
+          <li><strong>URL Encode:</strong> Safely encodes components (e.g. converting special characters to URI sequences).</li>
+          <li><strong>Double URL Decode:</strong> Decodes twice — for URLs that have been encoded multiple times. Falls back to single decode if double decoding fails.</li>
+          <li><strong>Base64 Decode:</strong> Decodes base64-encoded strings (useful for extracting encoded target URLs from landing redirects).</li>
+        </ul>
+
+        <h4>Processing Examples</h4>
+        <table>
+          <tr><th>Mode</th><th>Input</th><th>Output</th></tr>
+          <tr><td>URL Decode</td><td><code>%2Fbar%2Ffoo%3Fx%3D2</code></td><td><code>/bar/foo?x=2</code></td></tr>
+          <tr><td>URL Encode</td><td><code>/bar/foo?x=2</code></td><td><code>%2Fbar%2Ffoo%3Fx%3D2</code></td></tr>
+          <tr><td>Double URL Decode</td><td><code>%252Fbar%252Ffoo%253Fx%253D2</code></td><td><code>/bar/foo?x=2</code></td></tr>
+          <tr><td>Base64 Decode</td><td><code>aHR0cDovL2Nubi5jb20=</code></td><td><code>http://cnn.com</code></td></tr>
+        </table>
+      </section>
+
+      <section class="card" id="apply-to">
+        <h2>Apply To (Request Types)</h2>
+        <p>By default, Redirector only intercepts main window navigation (address bar requests). You can expand this to other resource types:</p>
+        <ul>
+          <li><strong>Main Window:</strong> Normal page navigation in the address bar.</li>
+          <li><strong>IFrames:</strong> Embedded frames within pages.</li>
+          <li><strong>Scripts / Stylesheets / Images / Fonts:</strong> Resource requests of those types.</li>
+          <li><strong>Ajax (Fetch/XHR):</strong> API calls and dynamic content loading.</li>
+          <li><strong>HistoryState (SPAs):</strong> Intercepts pushState/replaceState navigation in single-page apps (e.g., Facebook, Twitter, YouTube). Requires the rule to NOT be sent to DNR — engine-only evaluation.</li>
+        </ul>
+        <p><strong>Performance note:</strong> Expanding to script/image/font types adds overhead. Only check types you actually need to redirect.</p>
+      </section>
+
+      <section class="card" id="storage-sync">
+        <h2>Storage Sync</h2>
+        <p>Enable <strong>Storage Sync</strong> to share your redirect rules across devices via your browser's sync service (Chrome Sync or Firefox Sync).</p>
+        <p><strong>Limits:</strong></p>
+        <ul>
+          <li><strong>Local storage:</strong> 10 MB (default). Recommended for most users.</li>
+          <li><strong>Sync storage:</strong> ~100 KB total, each item max 8 KB. Rules exceeding the per-item limit will be rejected.</li>
+        </ul>
+        <p>If you have many rules or long patterns, keep sync disabled to avoid capacity errors.</p>
+      </section>
+
+      <section class="card" id="organize-mode">
+        <h2>Organize Mode &amp; Grouping</h2>
+        <p>Click <strong>Organize</strong> on the dashboard toolbar to enter organize mode:</p>
+        <ul>
+          <li><strong>Grouping checkmarks:</strong> Link adjacent rules by checking the box. Grouped rules:</li>
+          <ul>
+            <li>Enable/disable together</li>
+            <li>Move as a block when reordering</li>
+          </ul>
+          <li><strong>Jump arrows (&#x27F0;/&#x27F1;):</strong> Move rules to the top or bottom of the list instantly.</li>
+          <li><strong>Visual indication:</strong> Grouped rules share a blue left border with dashed bottom edges.</li>
+        </ul>
+        <p>Groups are also editable inside the rule editor under <strong>Advanced Options</strong>.</p>
+      </section>
+
+      <section class="card" id="examples">
+        <h2>Detailed Examples</h2>
+
+        <h3>1. Static Redirect</h3>
+        <table>
+          <tr><th>Example URL</th><td><code>http://example.com/foo</code></td></tr>
+          <tr><th>Include Pattern</th><td><code>http://example.com/foo</code></td></tr>
+          <tr><th>Pattern Type</th><td>Wildcard</td></tr>
+          <tr><th>Redirect To</th><td><code>http://example.com/bar</code></td></tr>
+          <tr><th>Result</th><td><code>http://example.com/bar</code></td></tr>
+        </table>
+
+        <h3>2. Redirect Using Query String Parameters</h3>
+        <table>
+          <tr><th>Example URL</th><td><code>http://example.com/index.php?id=12345&amp;a=b</code></td></tr>
+          <tr><th>Include Pattern</th><td><code>http://example.com/index.php?id=*&amp;a=b</code></td></tr>
+          <tr><th>Pattern Type</th><td>Wildcard</td></tr>
+          <tr><th>Redirect To</th><td><code>http://example.com/printerfriendly.php?id=$1&amp;a=b</code></td></tr>
+        </table>
+
+        <h3>3. Redirect http:// to https://</h3>
+        <table>
+          <tr><th>Example URL</th><td><code>http://mail.google.com/randomchars</code></td></tr>
+          <tr><th>Include Pattern</th><td><code>*://mail.google.com/*</code></td></tr>
+          <tr><th>Pattern Type</th><td>Wildcard</td></tr>
+          <tr><th>Redirect To</th><td><code>https://mail.google.com/$2</code></td></tr>
+        </table>
+
+        <h3>4. Redirect with Exclude Pattern</h3>
+        <table>
+          <tr><th>Example URL</th><td><code>http://example.com/category/fish/index.php</code></td></tr>
+          <tr><th>Include Pattern</th><td><code>http://example.com/category/*/index.php</code></td></tr>
+          <tr><th>Exclude Pattern</th><td><code>http://example.com/category/*/*/index.php</code></td></tr>
+          <tr><th>Redirect To</th><td><code>http://example.com/category/cat/index.php</code></td></tr>
+        </table>
+
+        <h3>5. Remove Tracking Parameters</h3>
+        <table>
+          <tr><th>Example URL</th><td><code>https://ad.doubleclick.net/ddm/trackclk/foo?https://www.example.com</code></td></tr>
+          <tr><th>Include Pattern</th><td><code>^(?:https?://)ad.doubleclick.net/.*\?(.*)</code></td></tr>
+          <tr><th>Pattern Type</th><td>Regular Expression</td></tr>
+          <tr><th>Redirect To</th><td><code>$1</code></td></tr>
+        </table>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>Redirector Rewrite &bull; Open Source Request Routing Engine</p>
+    </footer>
+  </div>
+</body>
+</html>

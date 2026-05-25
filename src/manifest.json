@@ -1,0 +1,82 @@
+{
+  "manifest_version": 3,
+  "name": "Redirector Rewrite",
+  "version": "0.0.0",
+  "version_name": "v0.0.0",
+  "description": "Clean, lightweight rewrite of Redirector browser extension.",
+  "homepage_url": "https://github.com/pngdeity/redirector-rewrite",
+  "minimum_chrome_version": "91",
+  "_comment_general": "Chrome Web Store requires root icons for listing. Firefox uses these for about:addons display.",
+  "icons": {
+    "16": "assets/icons/icon-light-16.png",
+    "32": "assets/icons/icon-light-32.png",
+    "48": "assets/icons/icon-light-48.png",
+    "128": "assets/icons/icon-light-128.png"
+  },
+  "permissions": [
+    "storage",
+    "declarativeNetRequest",
+    "webNavigation",
+    "tabs",
+    "notifications"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "_comment_background": "service_worker: Chrome & Firefox ≥128 (ES module). scripts: Firefox fallback; ignored by Chrome.",
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module",
+    "scripts": [
+      "background/service-worker.js"
+    ]
+  },
+  "action": {
+    "default_popup": "ui/popup/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon-light-16.png",
+      "32": "assets/icons/icon-light-32.png",
+      "48": "assets/icons/icon-light-48.png",
+      "128": "assets/icons/icon-light-128.png"
+    },
+    "_comment_theme_icons": "Firefox honors theme_icons for adaptive dark/light mode. Chrome ignores this key.",
+    "theme_icons": [
+      {
+        "light": "assets/icons/icon-light-16.png",
+        "dark": "assets/icons/icon-dark-16.png",
+        "size": 16
+      },
+      {
+        "light": "assets/icons/icon-light-32.png",
+        "dark": "assets/icons/icon-dark-32.png",
+        "size": 32
+      },
+      {
+        "light": "assets/icons/icon-light-48.png",
+        "dark": "assets/icons/icon-dark-48.png",
+        "size": 48
+      },
+      {
+        "light": "assets/icons/icon-light-128.png",
+        "dark": "assets/icons/icon-dark-128.png",
+        "size": 128
+      }
+    ]
+  },
+  "options_ui": {
+    "page": "ui/dashboard/dashboard.html",
+    "open_in_tab": true
+  },
+  "_comment_firefox": "All keys below are browser_specific_settings — ignored by Chrome, Edge, Opera, Brave, etc.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "redirector-rewrite@pngdeity.ru",
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  }
+}

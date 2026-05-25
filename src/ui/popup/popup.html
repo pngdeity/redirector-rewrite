@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirector Popup</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header>
+      <h1 class="logo">REDIRECTOR</h1>
+      <p class="subtitle">Go where <em>YOU</em> want!</p>
+    </header>
+
+    <main>
+      <!-- Global Toggle Section -->
+      <div class="status-card">
+        <span class="status-label">Extension Status</span>
+        <button id="toggle-disabled" class="btn btn-toggle" aria-label="Toggle extension status">
+          <span class="status-text">Enabled</span>
+        </button>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="actions-section">
+        <button id="open-dashboard" class="btn btn-primary">Edit Redirects</button>
+      </div>
+
+      <!-- Option Toggles -->
+      <div class="options-section">
+        <label class="toggle-control">
+          <input type="checkbox" id="enable-logging">
+          <span class="control-label">Enable logging</span>
+        </label>
+        
+        <label class="toggle-control">
+          <input type="checkbox" id="enable-notifications">
+          <span class="control-label">Enable notifications</span>
+        </label>
+      </div>
+    </main>
+
+    <footer>
+      <small id="version-footer">Redirector Rewrite</small>
+    </footer>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

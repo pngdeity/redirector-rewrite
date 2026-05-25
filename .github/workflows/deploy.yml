@@ -1,0 +1,75 @@
+name: Release and Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      ci-run-id:
+        description: 'Run ID from the Verify-and-Package workflow that produced the artifact'
+        required: true
+        type: string
+
+jobs:
+  release:
+    name: Sign, Release, and Deploy
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: extension-package
+          run-id: ${{ inputs.ci-run-id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.1.2
+
+      - name: Sign Extension ZIP (Keyless OIDC)
+        run: |
+          cosign sign-blob --yes --bundle dist/redirector-rewrite.zip.bundle dist/redirector-rewrite.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/redirector-rewrite.zip
+            dist/redirector-rewrite.zip.bundle
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy to Chrome Web Store
+        run: npx chrome-webstore-upload-cli upload --source dist/redirector-rewrite.zip --auto-publish
+        env:
+          CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          APP_ID: ${{ secrets.CHROME_APP_ID }}
+
+      - name: Deploy to Firefox AMO
+        run: |
+          EXTRACT_DIR=$(mktemp -d)
+          unzip -q dist/redirector-rewrite.zip -d "$EXTRACT_DIR"
+          npx web-ext sign --source-dir "$EXTRACT_DIR" --artifacts-dir dist --channel listed --api-key $AMO_JWT_ISSUER --api-secret $AMO_JWT_SECRET
+          rm -rf "$EXTRACT_DIR"
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
